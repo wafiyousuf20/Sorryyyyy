@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>For you</title>
+  <meta name="theme-color" content="#ff86b7" />
+
+  <style>
+    :root{
+      --bg1:#fff1f7;
+      --bg2:#ffe3ef;
+      --bg3:#ffd3e7;
+
+      --ink:#2a1620;
+      --muted:#6b3d53;
+
+      --card: rgba(255,255,255,.64);
+      --stroke: rgba(255,105,180,.26);
+
+      --shadow: 0 24px 80px rgba(60,10,30,.18);
+      --soft: 0 14px 40px rgba(255,105,180,.14);
+      --glow: 0 0 0 1px rgba(255,105,180,.20), 0 0 60px rgba(255,105,180,.20);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--ink);
+      overflow-x:hidden;
+
+      background:
+        radial-gradient(1400px 900px at 20% 15%, rgba(255,105,180,.30), transparent 60%),
+        radial-gradient(1100px 800px at 80% 20%, rgba(255,182,193,.30), transparent 55%),
+        radial-gradient(900px 700px at 50% 80%, rgba(255,105,180,.18), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2) 55%, var(--bg3));
+    }
+
+    /* dreamy grain */
+    .grain{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.12;
+      mix-blend-mode:multiply;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+    }
+    .vignette{
+      position:fixed; inset:-10%;
+      pointer-events:none;
+      background: radial-gradient(circle at center, transparent 40%, rgba(60,10,30,.10) 85%);
+      opacity:.45;
+      filter: blur(1px);
+    }
+    .sparkles{
+      position:fixed; inset:0;
+      pointer-events:none;
+      z-index:1;
+      opacity:.45;
+      background:
+        radial-gradient(2px 2px at 12% 25%, rgba(255,255,255,.7), transparent 60%),
+        radial-gradient(2px 2px at 22% 62%, rgba(255,255,255,.6), transparent 60%),
+        radial-gradient(1.5px 1.5px at 35% 18%, rgba(255,255,255,.6), transparent 60%),
+        radial-gradient(2px 2px at 48% 38%, rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(2px 2px at 62% 72%, rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(1.5px 1.5px at 76% 30%, rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(2px 2px at 88% 58%, rgba(255,255,255,.6), transparent 60%);
+      filter: blur(.2px);
+    }
+
+    /* falling hearts */
+    .heartsLayer{
+      position:fixed; inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:0;
+    }
+    .heart{
+      position:absolute;
+      top:-12vh;
+      color: rgba(255, 77, 165, .65);
+      text-shadow: 0 10px 26px rgba(255,105,180,.18);
+      filter: drop-shadow(0 10px 18px rgba(255,105,180,.14));
+      animation-name: fall, sway;
+      animation-timing-function: linear, ease-in-out;
+      animation-iteration-count: infinite, infinite;
+      will-change: transform;
+      user-select:none;
+      opacity:.9;
+    }
+    @keyframes fall{
+      from{ transform: translate3d(var(--x,0), -15vh, 0) rotate(0deg) scale(var(--s,1)); }
+      to  { transform: translate3d(var(--x,0), 115vh, 0) rotate(var(--r, 220deg)) scale(var(--s,1)); }
+    }
+    @keyframes sway{
+      0%,100%{ margin-left: 0px; }
+      50%{ margin-left: var(--w, 22px); }
+    }
+
+    .wrap{
+      position:relative;
+      z-index:2;
+      width:min(980px, 92vw);
+      margin:0 auto;
+      padding:44px 0 70px;
+    }
+
+    /* Top header line */
+    .topLine{
+      margin: 6px auto 24px;
+      max-width: 70ch;
+      text-align:center;
+      font-size: clamp(20px, 2.4vw, 28px);
+      font-weight: 650;
+      color: rgba(42,22,32,.92);
+      line-height: 1.55;
+      text-shadow: 0 16px 40px rgba(255,105,180,.12);
+    }
+
+    .card{
+      margin: 18px 0;
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      overflow:hidden;
+    }
+
+    /* Message card like screenshot */
+    .messageOuter{
+      padding: 22px;
+    }
+    .messageInner{
+      border-radius: 18px;
+      border: 1px dashed rgba(255,105,180,.26);
+      background: rgba(255,255,255,.58);
+      padding: 18px 18px 16px;
+      box-shadow: var(--soft);
+    }
+    .msgTitle{
+      margin: 0 0 10px;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing:.01em;
+    }
+    .msgText{
+      margin: 0 0 12px;
+      color: rgba(107,61,83,.92);
+      line-height: 1.85;
+      font-size: 15.5px;
+    }
+    .msgSig{
+      margin-top: 10px;
+      font-weight: 900;
+      color: rgba(42,22,32,.95);
+      font-size: 16px;
+    }
+    .miniHearts{
+      margin-top: 10px;
+      letter-spacing: .22em;
+      color: rgba(255,63,159,.92);
+      user-select:none;
+    }
+
+    .msgBtnRow{
+      display:flex;
+      justify-content:center;
+      margin-top: 12px;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(255,105,180,.25);
+      background: rgba(255,255,255,.72);
+      color: var(--ink);
+      padding: 10px 16px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight: 850;
+      box-shadow: 0 14px 36px rgba(60,10,30,.10);
+      transition: transform .15s ease, filter .15s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.02); }
+    .btn:active{ transform: translateY(0); }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(255,63,159,.20), rgba(255,255,255,.72));
+    }
+
+    /* Video card */
+    .videoHead{
+      padding: 18px 22px 10px;
+    }
+    .videoHead h2{
+      margin:0 0 6px;
+      font-size: 20px;
+      font-weight: 900;
+    }
+    .videoHead p{
+      margin:0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .videoWrap{
+      padding: 0 22px 22px;
+      position:relative;
+    }
+
+    video{
+      width:100%;
+      max-height: 72vh;
+      border-radius: 20px;
+      border: 1px solid rgba(255,105,180,.28);
+      box-shadow: 0 22px 70px rgba(255,105,180,.14);
+      background: rgba(255,255,255,.25);
+      display:block;
+    }
+
+    /* Locked effect: blur + overlay message */
+    .locked video{
+      filter: blur(18px) saturate(1.05);
+      transform: scale(1.02);
+    }
+
+    .lockedOverlay{
+      position:absolute;
+      inset: 0 22px 22px 22px;
+      border-radius: 20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding: 16px;
+      background: rgba(255, 220, 236, .40);
+      border: 1px solid rgba(255,105,180,.22);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--soft);
+    }
+    .lockedBox{
+      width:min(560px, 100%);
+      background: rgba(255,255,255,.66);
+      border: 1px dashed rgba(255,105,180,.28);
+      border-radius: 18px;
+      padding: 16px 16px 14px;
+    }
+    .lockedTitle{
+      margin:0 0 8px;
+      font-weight: 950;
+      letter-spacing:.01em;
+    }
+    .lockedText{
+      margin:0 0 12px;
+      color: rgba(107,61,83,.92);
+      line-height: 1.7;
+      font-size: 14.5px;
+    }
+
+    footer{
+      text-align:center;
+      margin-top: 10px;
+      color: rgba(107,61,83,.85);
+      font-size: 13px;
+      padding: 12px 0 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .heart{ animation: none !important; }
+      .locked video{ transform:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="sparkles" aria-hidden="true"></div>
+  <div class="heartsLayer" id="heartsLayer" aria-hidden="true"></div>
+
+  <main class="wrap">
+    <div class="topLine">
+      I wanted you to see this properly, quietly, and in the prettiest way I could make it.
+    </div>
+
+    <!-- MESSAGE CARD -->
+    <section class="card" id="messageCard">
+      <div class="messageOuter">
+        <div class="messageInner">
+          <div class="msgTitle">Hiii Jahanvi!!</div>
+
+          <p class="msgText">
+            I had it this planned before. I kept thinking about you and about how I wanted you to see this,
+            not in a random way but in a way that feels like you.
+          </p>
+
+          <p class="msgText">
+            I know I’m not perfect and I know things got complicated. I’m not trying to argue or explain anything.
+            Just hear my heart for a second.
+          </p>
+
+          <p class="msgText">
+            If you can forgive me, even a little, I’d hold that gently. I just needed you to know I still care. A lot.
+          </p>
+
+          <div class="msgSig">I love you bebo&lt;3</div>
+          <div class="miniHearts">♡ ♡ ♡ ♡ ♡</div>
+
+          <div class="msgBtnRow">
+            <button class="btn primary" id="readBtn" type="button">I’ve read it</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIDEO CARD -->
+    <section class="card locked" id="videoCard">
+      <div class="videoHead">
+        <h2>Lil suprise for my bebo!!</h2>
+        <p>Your fav movieee editt hehe &lt;3.</p>
+      </div>
+
+      <div class="videoWrap">
+        <!-- LOCAL VIDEO ONLY: filename is CASE-SENSITIVE -->
+        <video id="theVideo" controls playsinline preload="metadata">
+          <source src="MISSUUUU.MP4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        <div class="lockedOverlay" id="lockedOverlay">
+          <div class="lockedBox">
+            <div class="lockedTitle">Read the message first hehe &lt;3</div>
+            <div class="lockedText">Then you can watch the video.</div>
+            <button class="btn primary" id="unlockBtn" type="button">I’ve read it!!</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>made with hearts, always.</footer>
+  </main>
+
+  <script>
+    // Falling hearts
+    (function(){
+      const layer = document.getElementById("heartsLayer");
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!layer || prefersReduced) return;
+
+      const heartChars = ["♡","♥","❥","ღ","💗","💖","💕"];
+      const COUNT = 52;
+
+      function rand(min, max){ return Math.random() * (max - min) + min; }
+      function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+      for (let i=0; i<COUNT; i++){
+        const s = document.createElement("span");
+        s.className = "heart";
+        s.textContent = pick(heartChars);
+
+        const left = rand(0, 100);
+        const size = rand(14, 30);
+        const duration = rand(8.5, 15.5);
+        const delay = rand(-15, 0);
+        const sway = rand(-28, 28);
+        const rot = rand(180, 520);
+
+        s.style.left = left + "vw";
+        s.style.fontSize = size + "px";
+        s.style.animationDuration = `${duration}s, ${rand(3.2, 6.2)}s`;
+        s.style.animationDelay = `${delay}s, ${rand(0, 1.5)}s`;
+
+        s.style.setProperty("--x", "0px");
+        s.style.setProperty("--s", rand(0.8, 1.25));
+        s.style.setProperty("--w", sway + "px");
+        s.style.setProperty("--r", rot + "deg");
+
+        const alpha = rand(0.35, 0.85);
+        s.style.color = `rgba(255, 77, 165, ${alpha})`;
+
+        layer.appendChild(s);
+      }
+    })();
+
+    // Unlock logic: BOTH buttons work
+    (function(){
+      const readBtn = document.getElementById("readBtn");
+      const unlockBtn = document.getElementById("unlockBtn");
+      const videoCard = document.getElementById("videoCard");
+      const overlay = document.getElementById("lockedOverlay");
+      const video = document.getElementById("theVideo");
+
+      function unlock(){
+        // remove blur/lock style
+        videoCard.classList.remove("locked");
+        // hide overlay
+        overlay.style.display = "none";
+        // scroll to video like your screenshot flow
+        videoCard.scrollIntoView({ behavior:"smooth", block:"start" });
+
+        // Optional: focus video for quick play
+        try { video.focus(); } catch(e) {}
+      }
+
+      readBtn.addEventListener("click", unlock);
+      unlockBtn.addEventListener("click", unlock);
+
+      // Safety: block clicks on blurred video while locked
+      video.addEventListener("play", () => {
+        if (videoCard.classList.contains("locked")) {
+          video.pause();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
